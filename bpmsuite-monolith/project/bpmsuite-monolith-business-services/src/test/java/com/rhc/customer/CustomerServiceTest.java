@@ -7,6 +7,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.kie.api.KieServices;
 
+import com.rhc.aggregates.Customer;
+import com.rhc.entities.Address;
 import com.rhc.services.AbstractBusinessServicesTest;
 
 public class CustomerServiceTest extends AbstractBusinessServicesTest{
@@ -18,16 +20,28 @@ public class CustomerServiceTest extends AbstractBusinessServicesTest{
 	}
 	
 	@Test
-	public void shouldSuccessfullyStartACustomerOnboardProcess(){
+	public void shouldSuccessfullyStartAndCompleteACustomerOnboardProcess(){
 		// given
-		Assert.assertNotNull(customerService);
-		
+		Customer customer = new Customer("Leia", "Organa");
+	
 		// when 
-		Long processId = customerService.startCustomerOnboardProcess("Leia", "Organa");
+		Long processId = customerService.startCustomerOnboardProcess(customer);
+		boolean processComplete = customerService.isProcessComplete(processId);
+		if (!processComplete) {
+			Address address = new Address();
+			address.setStreet1("Apt 300");
+			address.setStreet2("6716 Hunterview Drive NW");
+			address.setCity("Calgary");
+			address.setState("Alberta");
+			address.setPostalCode("T2K 5C8");
+			address.setCountry("Canada");
+			customerService.addCustomerAddress(address, processId);
+			
+		}
 		
 		// then
 		Assert.assertEquals( new Long(1), processId);
-		Assert.assertEquals( 1, customerService.getNumberOfCustomerOnboardProcessesInProgress());
+		Assert.assertTrue( customerService.isProcessComplete(processId));
 	}
 	
 	
